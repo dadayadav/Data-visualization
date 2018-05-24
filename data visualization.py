@@ -161,3 +161,140 @@ import seaborn as sns; sns.set(color_codes=True)
 # Analyse with the Topic of alcohol only
 For_alcohol = disease[disease.Topic == 0] 
 ax = sns.lmplot(x="LocationAbbr", y="YearStart", data=For_alcohol)
+
+for_alcohol = data[data.Topic == 'Alcohol'] 
+for_alcohol['Question'].value_counts().plot(kind='bar')
+plt.show()
+
+for_alcohol['DataValueType'].value_counts().plot(kind='bar')
+plt.show()
+# Now we visualize that in alcohol category which is most afffected Male or Female
+male = 0
+female = 0
+for i in range(len(data['Stratification1'])):
+    if data['Topic'][i] == 'Alcohol':
+        if data['Stratification1'][i] == 'Male':
+            male += 1
+        if data['Stratification1'][i] == 'Female':
+            female += 1    
+print(male)
+print(female)
+# from graph we can also visualize that number of male and female is equal affected due to alcohol
+for_alcohol['Stratification1'].value_counts().plot(kind='bar')
+plt.show()
+# extract useful data feature other feature are just id of these data
+useful_data = data.iloc[:, [0,1,2,4,5,6,7,8,9]]
+# we visualize the dimention reduction method on data feature
+x = useful_data.iloc[:,2:]
+# we convert each variable into some numerical value
+# Encoder to the data variable
+from sklearn.preprocessing import LabelEncoder
+for i in x.columns:
+    if x[i].dtype == 'object':
+        lbl = LabelEncoder()
+        lbl.fit(list(x[i].values))
+        x[i] = lbl.transform(list(x[i].values)) 
+# create indication matrix
+# label the train data into numeric form by using OneHotEncoder
+from sklearn.preprocessing import OneHotEncoder
+ohe = OneHotEncoder(categorical_features = [0,1,2,3,4,5,6])
+x = ohe.fit_transform(x).toarray()
+# make burt matrix
+tx = x.transpose()
+mx = np.matrix(tx)
+my = np.matrix(x)
+x = mx * my
+# feature scaling
+from sklearn.preprocessing import StandardScaler
+sc = StandardScaler()
+x = sc.fit_transform(x)
+# applying PCA
+from sklearn.decomposition import PCA
+pca = PCA(n_components = 2) # first see how many value dominating then assign the component
+x_train = pca.fit_transform(x) 
+explained_variance = pca.explained_variance_ratio_
+explained_variance
+a = []
+b = []
+for i in range(len(x_train)):
+    x,y = x_train[i]
+    a.append(x)
+    b.append(y)
+
+fig = plt.figure(figsize= (5,5))
+ax = fig.add_subplot(111)
+ax.scatter(a, b, c=c)
+plt.show()
+# dimension analysis by taking less column
+y = data.iloc[:,2:5]
+for i in y.columns:
+    if y[i].dtype == 'object':
+        lbl = LabelEncoder()
+        lbl.fit(list(y[i].values))
+        y[i] = lbl.transform(list(y[i].values)) 
+ohe = OneHotEncoder(categorical_features = [0,1,2])
+y = ohe.fit_transform(y).toarray()
+# make burt matrix
+tx = y.transpose()
+mx = np.matrix(tx)
+my = np.matrix(y)
+y = mx * my
+# feature scaling
+from sklearn.preprocessing import StandardScaler
+sc = StandardScaler()
+y = sc.fit_transform(y)
+pca = PCA(n_components = 2) # first see how many value dominating then assign the component
+y_train = pca.fit_transform(y)
+a = []
+b = []
+for i in range(len(y_train)):
+    x,y = y_train[i]
+    a.append(x)
+    b.append(y)
+
+fig = plt.figure(figsize= (5,5))
+ax = fig.add_subplot(111)
+ax.scatter(a, b)
+plt.show()
+x = useful_data.iloc[:,2:]
+
+from sklearn.preprocessing import LabelEncoder
+for i in x.columns:
+    if x[i].dtype == 'object':
+        lbl = LabelEncoder()
+        lbl.fit(list(x[i].values))
+        x[i] = lbl.transform(list(x[i].values)) 
+sns.lmplot(x='Topic', y='Question', hue='DataSource', data=x, fit_reg=False)
+data['DataSource'].value_counts().plot(kind='bar')
+plt.show()
+# Filter DataSource 
+
+data_source = data[data['DataSource']== 'BRFSS']
+data_source.head()
+# year include when data source is BRFSS
+data_source['YearStart'].value_counts().plot(kind='bar')
+plt.show()
+
+data_source['Stratification1'].value_counts().plot(kind='bar')
+plt.show()
+# Apply Factor analysis on whole dataset
+from sklearn.decomposition import FactorAnalysis
+x = useful_data.iloc[:,2:]
+feature_names = ['locationAbbr', 'DataSource', 'Topic', 'Question', 'DataValueType', 'StratificationCategory1', 'Stratification1']
+for i in x.columns:
+    if x[i].dtype == 'object':
+        lbl = LabelEncoder()
+        lbl.fit(list(x[i].values))
+        x[i] = lbl.transform(list(x[i].values)) 
+factor = FactorAnalysis(n_components=None).fit(x)
+X = pd.DataFrame(factor.components_,columns = feature_names)
+# Visualize the relation between variables
+ Y = data.iloc[:,[2,4,5,6,7,8,9]]
+ from sklearn.preprocessing import LabelEncoder
+for i in Y.columns:
+    if Y[i].dtype == 'object':
+        lbl = LabelEncoder()
+        lbl.fit(list(Y[i].values))
+        Y[i] = lbl.transform(list(Y[i].values)) 
+sns.pairplot(Y)
+plt.show()
